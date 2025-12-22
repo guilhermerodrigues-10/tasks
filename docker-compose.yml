@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: flowstate-app
+    restart: always
+    ports:
+      - "3000:80"
+    # Como a configuração de API é feita via LocalStorage na tela de Login, 
+    # não precisamos passar variáveis de ambiente aqui obrigatoriamente.
