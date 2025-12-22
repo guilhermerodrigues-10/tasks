@@ -168,12 +168,11 @@ const TaskListView: React.FC<{ tasks: Task[], onTaskClick: (t: Task) => void }> 
             sortableItems.sort((a, b) => {
                 let aValue = a[sortConfig.key];
                 let bValue = b[sortConfig.key];
-                
-                // Handle null/undefined dates
-                if (sortConfig.key === 'dueDate') {
-                     if (!aValue) return 1;
-                     if (!bValue) return -1;
-                }
+
+                // Handle null/undefined values
+                if (!aValue && !bValue) return 0;
+                if (!aValue) return 1;
+                if (!bValue) return -1;
 
                 if (aValue < bValue) {
                     return sortConfig.direction === 'asc' ? -1 : 1;

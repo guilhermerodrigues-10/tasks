@@ -17,6 +17,9 @@ const supabaseKey = localStorage.getItem('sb_key') || getEnv('VITE_SUPABASE_ANON
 // Inicializa o cliente. Se as strings estiverem vazias, a conexão falhará, mas o app não quebra.
 // O usuário poderá corrigir isso na tela de Login.
 export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co', 
+  supabaseUrl || 'https://placeholder.supabase.co',
   supabaseKey || 'placeholder-key'
 );
+
+// Export URL for checking if config is needed
+export const supabaseUrl_export = supabaseUrl || 'https://placeholder.supabase.co';

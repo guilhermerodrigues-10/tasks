@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, supabaseUrl_export } from '../lib/supabaseClient';
 import { Zap, Loader2, Mail, Lock, ArrowRight, Settings, AlertCircle, Save } from 'lucide-react';
 import { Button } from './Button';
 
@@ -23,7 +23,7 @@ export const Auth = () => {
     if (savedKey) setConfigKey(savedKey);
 
     // Se não houver config salva e as envs não existirem (detectado pelo placeholder no client), sugerir config
-    if (!savedUrl && supabase.supabaseUrl.includes('placeholder')) {
+    if (!savedUrl && supabaseUrl_export.includes('placeholder')) {
         // Opcional: abrir config automaticamente ou mostrar aviso
     }
   }, []);
