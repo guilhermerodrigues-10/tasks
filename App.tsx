@@ -456,21 +456,21 @@ export default function App() {
 
   const handleSaveAccount = async () => {
       if (!accName) return;
-      
+
       const payload = {
           name: accName,
           balance: parseFloat(accBalance) || 0,
           color: accColor,
           type: accType,
-          limit: accType === 'credit-card' ? parseFloat(accLimit) : null
+          credit_limit: accType === 'credit-card' ? parseFloat(accLimit) : null
       };
 
       if (editingAccId) {
-          setAccounts(prev => prev.map(a => a.id === editingAccId ? { ...a, ...payload, limit: payload.limit || undefined } : a));
+          setAccounts(prev => prev.map(a => a.id === editingAccId ? { ...a, ...payload, credit_limit: payload.credit_limit || undefined } : a));
           await supabase.from('accounts').update(payload).eq('id', editingAccId);
       } else {
           const newId = generateId();
-          setAccounts(prev => [...prev, { id: newId, ...payload, limit: payload.limit || undefined }]);
+          setAccounts(prev => [...prev, { id: newId, ...payload, credit_limit: payload.credit_limit || undefined }]);
           await supabase.from('accounts').insert({ id: newId, ...payload });
       }
       resetAccForm();
@@ -483,7 +483,7 @@ export default function App() {
       setAccBalance(a.balance.toString());
       setAccColor(a.color);
       setAccType(a.type);
-      setAccLimit(a.limit?.toString() || '');
+      setAccLimit(a.credit_limit?.toString() || '');
       setIsAccountModalOpen(true);
   };
 

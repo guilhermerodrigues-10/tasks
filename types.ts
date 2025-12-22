@@ -46,7 +46,7 @@ export interface Account {
   balance: number;
   color: string; // hex or tailwind class reference
   type: 'checking' | 'savings' | 'investment' | 'cash' | 'credit-card';
-  limit?: number; // Only for credit cards
+  credit_limit?: number; // Only for credit cards
 }
 
 export interface Transaction {

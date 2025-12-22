@@ -42,7 +42,7 @@ CREATE TABLE accounts (
   balance DECIMAL(12,2) DEFAULT 0,
   color TEXT,
   type TEXT,
-  limit DECIMAL(12,2),
+  credit_limit DECIMAL(12,2),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
