@@ -2,10 +2,14 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
     container_name: flowstate-app
     restart: always
     ports:
       - "3000:80"
-    # Como a configuração de API é feita via LocalStorage na tela de Login, 
-    # não precisamos passar variáveis de ambiente aqui obrigatoriamente.
+    environment:
+      - NODE_ENV=production
