@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    image: guilhermerodrigues10/flowstate:latest
+    build:
+      context: https://github.com/guilhermerodrigues-10/tasks.git#master
+      args:
+        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+    container_name: flowstate-app
+    restart: always
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production

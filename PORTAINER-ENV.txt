@@ -1,0 +1,23 @@
+====================================
+VARIÁVEIS DE AMBIENTE PARA PORTAINER
+====================================
+
+Copie e cole estas variáveis na seção "Environment variables"
+do Portainer ao criar a Stack:
+
+VITE_SUPABASE_URL=https://ncbmjkhoplgyfgxeqhmo.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYm1qa2hvcGxneWZneGVxaG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzMwMzgsImV4cCI6MjA4MTA0OTAzOH0.t6_KI2oF6u7jmFwu8R_Av16vcBe5qgUTYgr9p1u4Ux4
+
+====================================
+PASSO A PASSO NO PORTAINER:
+====================================
+
+1. No Portainer, vá em "Stacks" → "Add stack"
+2. Nome da stack: flowstate
+3. Build method: "Repository"
+4. Repository URL: https://github.com/guilhermerodrigues-10/tasks
+5. Compose path: docker-compose.yml
+6. Na seção "Environment variables", adicione as 2 variáveis acima
+7. Clique em "Deploy the stack"
+
+====================================
