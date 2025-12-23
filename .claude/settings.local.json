@@ -10,7 +10,10 @@
       "Bash(dir:*)",
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(docker login:*)",
+      "Bash(docker build:*)",
+      "Bash(docker push:*)"
     ]
   }
 }
