@@ -130,7 +130,15 @@ export const createBackendClient = () => {
         if (token) {
           this.getUser().then(({ data }) => {
             if (data.user) {
-              callback('SIGNED_IN', { access_token: token, user: data.user });
+              const session: Session = {
+                access_token: token,
+                refresh_token: '',
+                expires_in: 0,
+                expires_at: 0,
+                token_type: 'bearer',
+                user: data.user,
+              };
+              callback('SIGNED_IN', session);
             } else {
               callback('SIGNED_OUT', null);
             }
