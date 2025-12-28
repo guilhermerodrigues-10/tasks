@@ -1,3 +1,5 @@
+import type { Session } from '@supabase/supabase-js';
+
 // Backend API Client - Compatible with Supabase interface
 const getEnv = (key: string) => {
   try {
@@ -32,6 +34,29 @@ export const createBackendClient = () => {
 
   return {
     auth: {
+      async getSession() {
+        const token = getToken();
+        if (!token) {
+          return { data: { session: null }, error: null };
+        }
+
+        const { data, error } = await this.getUser();
+        if (error || !data?.user) {
+          return { data: { session: null }, error: error || null };
+        }
+
+        const session: Session = {
+          access_token: token,
+          refresh_token: '',
+          expires_in: 0,
+          expires_at: 0,
+          token_type: 'bearer',
+          user: data.user,
+        };
+
+        return { data: { session }, error: null };
+      },
+
       async signUp({ email, password }: { email: string; password: string }) {
         const response = await fetch(`${API_URL}/auth/signup`, {
           method: 'POST',
@@ -99,7 +124,7 @@ export const createBackendClient = () => {
         }
       },
 
-      onAuthStateChange(callback: (event: string, session: any) => void) {
+      onAuthStateChange(callback: (event: string, session: Session | null) => void) {
         // Simulate auth state check on mount
         const token = getToken();
         if (token) {
