@@ -500,6 +500,22 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                  </div>
              )}
 
+             {/* Total Income Summary with Receivables */}
+            <div className="bg-emerald-100/50 p-4 rounded-xl border border-emerald-200 flex justify-between items-center mt-4">
+                <div className="flex flex-col">
+                    <span className="font-bold text-slate-700 text-sm uppercase">Ganhos Totais (Projetados)</span>
+                    <span className="text-xs text-slate-500">Recebidos + A Receber</span>
+                </div>
+                <div className="flex flex-col items-end">
+                    <span className="text-xl font-bold text-emerald-700">
+                        {formatCurrency(totalIncome + totalCurrentMonthReceivables)}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                        {formatCurrency(totalIncome)} + {formatCurrency(totalCurrentMonthReceivables)}
+                    </span>
+                </div>
+            </div>
+
              {/* Total Expenses Summary (Matching the 'Gastos Totais' in spreadsheet) */}
             <div className="bg-orange-200/50 p-4 rounded-xl border border-orange-200 flex justify-between items-center mt-4">
                 <span className="font-bold text-slate-700 text-sm uppercase">Gastos Totais (Projetados)</span>
