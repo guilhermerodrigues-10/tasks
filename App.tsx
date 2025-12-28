@@ -8,7 +8,7 @@ import { FinanceView } from './components/FinanceView';
 import { Modal } from './components/Modal';
 import { Button } from './components/Button';
 import { Auth } from './components/Auth';
-import { Task, Routine, ViewMode, Status, Priority, Account, Transaction, FinancialGoal, TransactionType } from './types';
+import { Task, Routine, ViewMode, Status, Priority, Account, Transaction, FinancialGoal, TransactionType, Receivable } from './types';
 import { generateId, cn, calculateStreak } from './utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -28,6 +28,7 @@ export default function App() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<FinancialGoal[]>([]);
+  const [receivables, setReceivables] = useState<Receivable[]>([]);
 
   const [view, setView] = useState<ViewMode>('kanban');
   
@@ -38,6 +39,7 @@ export default function App() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isAccountManagementModalOpen, setIsAccountManagementModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isReceivableModalOpen, setIsReceivableModalOpen] = useState(false);
   
   // Task Forms
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -74,6 +76,12 @@ export default function App() {
   const [goalTitle, setGoalTitle] = useState('');
   const [goalTarget, setGoalTarget] = useState('');
   const [goalCurrent, setGoalCurrent] = useState('');
+
+  const [editingReceivableId, setEditingReceivableId] = useState<string | null>(null);
+  const [receivableDesc, setReceivableDesc] = useState('');
+  const [receivableAmount, setReceivableAmount] = useState('');
+  const [receivableDate, setReceivableDate] = useState('');
+  const [receivableCategory, setReceivableCategory] = useState('');
 
   // --- SUPABASE AUTH & FETCH ---
   useEffect(() => {
@@ -180,6 +188,22 @@ export default function App() {
                color: g.color
            }));
            setGoals(formattedGoals);
+       }
+
+       // Fetch Receivables
+       const { data: receivablesData } = await supabase.from('receivables').select('*');
+       if (receivablesData) {
+           const formattedReceivables = receivablesData.map((r: any) => ({
+               id: r.id,
+               description: r.description,
+               amount: parseFloat(r.amount) || 0,
+               expectedDate: r.expected_date,
+               category: r.category,
+               received: r.received || false,
+               receivedDate: r.received_date,
+               accountId: r.account_id
+           }));
+           setReceivables(formattedReceivables);
        }
 
     } catch (error) {
@@ -561,6 +585,96 @@ export default function App() {
       setGoalTitle(''); setGoalTarget(''); setGoalCurrent('');
   };
 
+  // RECEIVABLES HANDLERS
+  const handleSaveReceivable = async () => {
+      if (!receivableDesc || !receivableAmount || !receivableDate) return;
+
+      const payload = {
+          description: receivableDesc,
+          amount: parseFloat(receivableAmount),
+          expected_date: receivableDate,
+          category: receivableCategory || 'Outros',
+          received: false
+      };
+
+      if (editingReceivableId) {
+          setReceivables(prev => prev.map(r => r.id === editingReceivableId ? { ...r, ...payload, expectedDate: payload.expected_date } : r));
+          await supabase.from('receivables').update(payload).eq('id', editingReceivableId);
+      } else {
+          const newId = generateId();
+          const newReceivable = { id: newId, ...payload, expectedDate: payload.expected_date, received: false };
+          setReceivables(prev => [...prev, newReceivable]);
+          await supabase.from('receivables').insert({ id: newId, ...payload });
+      }
+      resetReceivableForm();
+      setIsReceivableModalOpen(false);
+  };
+
+  const handleEditReceivable = (r: Receivable) => {
+      setEditingReceivableId(r.id);
+      setReceivableDesc(r.description);
+      setReceivableAmount(r.amount.toString());
+      setReceivableDate(r.expectedDate);
+      setReceivableCategory(r.category);
+      setIsReceivableModalOpen(true);
+  };
+
+  const handleDeleteReceivable = async (id: string) => {
+      if (confirm('Excluir este valor a receber?')) {
+          setReceivables(prev => prev.filter(r => r.id !== id));
+          await supabase.from('receivables').delete().eq('id', id);
+      }
+  };
+
+  const handleMarkAsReceived = async (receivableId: string, accountId: string) => {
+      const receivable = receivables.find(r => r.id === receivableId);
+      if (!receivable) return;
+
+      const today = format(new Date(), 'yyyy-MM-dd');
+
+      // Update receivable as received
+      const updatePayload = {
+          received: true,
+          received_date: today,
+          account_id: accountId
+      };
+
+      setReceivables(prev => prev.map(r => r.id === receivableId ? { ...r, received: true, receivedDate: today, accountId } : r));
+      await supabase.from('receivables').update(updatePayload).eq('id', receivableId);
+
+      // Create income transaction
+      const transactionPayload = {
+          id: generateId(),
+          account_id: accountId,
+          amount: receivable.amount,
+          type: 'income',
+          category: receivable.category,
+          description: receivable.description,
+          date: today
+      };
+
+      setTransactions(prev => [...prev, { ...transactionPayload, accountId: transactionPayload.account_id }]);
+      await supabase.from('transactions').insert(transactionPayload);
+
+      // Update account balance
+      const account = accounts.find(a => a.id === accountId);
+      if (account) {
+          const newBalance = account.balance + receivable.amount;
+          setAccounts(prev => prev.map(a => a.id === accountId ? { ...a, balance: newBalance } : a));
+          await supabase.from('accounts').update({ balance: newBalance }).eq('id', accountId);
+      }
+
+      await fetchData(); // Refresh all data
+  };
+
+  const resetReceivableForm = () => {
+      setEditingReceivableId(null);
+      setReceivableDesc('');
+      setReceivableAmount('');
+      setReceivableDate('');
+      setReceivableCategory('');
+  };
+
 
   const NavButton = ({ icon: Icon, label, active, onClick }: any) => (
     <button 
@@ -714,17 +828,22 @@ export default function App() {
                         accounts={accounts}
                         transactions={transactions}
                         goals={goals}
+                        receivables={receivables}
                         onAddTransaction={() => { resetTransForm(); setIsTransModalOpen(true); }}
                         onAddAccount={() => { resetAccForm(); setIsAccountModalOpen(true); }}
                         onManageAccounts={() => setIsAccountManagementModalOpen(true)}
                         onAddCreditCard={handleAddCreditCard}
                         onAddGoal={() => { resetGoalForm(); setIsGoalModalOpen(true); }}
+                        onAddReceivable={() => { resetReceivableForm(); setIsReceivableModalOpen(true); }}
                         onEditTransaction={handleEditTransaction}
                         onDeleteTransaction={handleDeleteTransaction}
                         onEditAccount={handleEditAccount}
                         onDeleteAccount={handleDeleteAccount}
                         onEditGoal={handleEditGoal}
                         onDeleteGoal={handleDeleteGoal}
+                        onEditReceivable={handleEditReceivable}
+                        onDeleteReceivable={handleDeleteReceivable}
+                        onMarkAsReceived={handleMarkAsReceived}
                     />
                 )}
                 {view === 'dashboard' && (
@@ -1036,6 +1155,34 @@ export default function App() {
                           </Button>
                       </div>
                   )}
+              </div>
+          </div>
+      </Modal>
+
+      {/* RECEIVABLE MODAL */}
+      <Modal isOpen={isReceivableModalOpen} onClose={() => setIsReceivableModalOpen(false)} title={editingReceivableId ? "Editar A Receber" : "Novo A Receber"}>
+          <div className="space-y-4">
+              <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Descrição</label>
+                  <input type="text" value={receivableDesc} onChange={e => setReceivableDesc(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="Ex: Salário, Freelance" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Valor (R$)</label>
+                    <input type="number" step="0.01" value={receivableAmount} onChange={e => setReceivableAmount(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Data Prevista</label>
+                    <input type="date" value={receivableDate} onChange={e => setReceivableDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" />
+                  </div>
+              </div>
+              <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Categoria</label>
+                  <input type="text" value={receivableCategory} onChange={e => setReceivableCategory(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="Ex: Salário, Freelance" />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                  <Button variant="ghost" onClick={() => setIsReceivableModalOpen(false)}>Cancelar</Button>
+                  <Button onClick={handleSaveReceivable}>Salvar</Button>
               </div>
           </div>
       </Modal>
