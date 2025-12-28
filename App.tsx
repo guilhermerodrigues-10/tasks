@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Calendar, ListTodo, BarChart3, Plus, Settings, Zap, Wallet, CheckSquare, Loader2, LogOut } from 'lucide-react';
+import { Layout, Calendar, ListTodo, BarChart3, Plus, Settings, Zap, Wallet, CheckSquare, Loader2, LogOut, RefreshCw } from 'lucide-react';
 import { KanbanBoard } from './components/KanbanBoard';
 import { RoutineList } from './components/RoutineList';
 import { CalendarView } from './components/CalendarView';
@@ -22,6 +22,7 @@ export default function App() {
 
   // --- DATA STATE ---
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -180,6 +181,12 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
   };
 
   const handleLogout = async () => {
@@ -645,6 +652,17 @@ export default function App() {
             </div>
             
             <div className="flex gap-3">
+                <Button
+                    onClick={handleRefresh}
+                    variant="ghost"
+                    disabled={refreshing}
+                    className="gap-2 rounded-xl"
+                    title="Atualizar dados"
+                >
+                    <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+                    {refreshing ? 'Atualizando...' : 'Atualizar'}
+                </Button>
+
                 {view === 'kanban' && (
                     <Button onClick={() => handleOpenNewTask()} className="gap-2 rounded-xl shadow-brand-500/20 shadow-lg">
                         <Plus size={18} /> Nova Tarefa
