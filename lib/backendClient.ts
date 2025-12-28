@@ -1,5 +1,14 @@
 // Backend API Client - Compatible with Supabase interface
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const getEnv = (key: string) => {
+  try {
+    // @ts-ignore
+    return import.meta.env?.[key];
+  } catch {
+    return undefined;
+  }
+};
+
+const API_URL = getEnv('VITE_API_URL') || 'http://localhost:3001';
 
 // Supabase-compatible client that proxies to backend
 export const createBackendClient = () => {
