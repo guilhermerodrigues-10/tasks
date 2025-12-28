@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Account, Transaction, FinancialGoal } from '../types';
+import { Account, Transaction, FinancialGoal, Receivable } from '../types';
 import { cn } from '../utils';
-import { 
-  Wallet, TrendingUp, TrendingDown, Plus, 
-  PiggyBank, CreditCard, ArrowUpRight, ArrowDownRight, 
-  Filter, Pencil, Trash2, Search, Landmark, Coins, PieChart as PieChartIcon
+import {
+  Wallet, TrendingUp, TrendingDown, Plus,
+  PiggyBank, CreditCard, ArrowUpRight, ArrowDownRight,
+  Filter, Pencil, Trash2, Search, Landmark, Coins, PieChart as PieChartIcon, CalendarClock, CheckCircle2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -14,17 +14,22 @@ interface FinanceViewProps {
   accounts: Account[];
   transactions: Transaction[];
   goals: FinancialGoal[];
+  receivables: Receivable[];
   onAddTransaction: () => void;
   onAddAccount: () => void;
   onManageAccounts: () => void;
   onAddCreditCard: () => void;
   onAddGoal: () => void;
+  onAddReceivable: () => void;
   onEditTransaction: (t: Transaction) => void;
   onDeleteTransaction: (id: string) => void;
   onEditAccount: (a: Account) => void;
   onDeleteAccount: (id: string) => void;
   onEditGoal: (g: FinancialGoal) => void;
   onDeleteGoal: (id: string) => void;
+  onEditReceivable: (r: Receivable) => void;
+  onDeleteReceivable: (id: string) => void;
+  onMarkAsReceived: (receivableId: string, accountId: string) => void;
 }
 
 const formatCurrency = (val: number) => {
@@ -67,17 +72,22 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
   accounts,
   transactions,
   goals,
+  receivables,
   onAddTransaction,
   onAddAccount,
   onManageAccounts,
   onAddCreditCard,
   onAddGoal,
+  onAddReceivable,
   onEditTransaction,
   onDeleteTransaction,
   onEditAccount,
   onDeleteAccount,
   onEditGoal,
-  onDeleteGoal
+  onDeleteGoal,
+  onEditReceivable,
+  onDeleteReceivable,
+  onMarkAsReceived
 }) => {
   
   // --- Calculations ---
@@ -96,8 +106,14 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
   const totalBalance = accounts.reduce((acc, curr) => {
     const balance = typeof curr.balance === 'number' && !isNaN(curr.balance) ? curr.balance : 0;
     return acc + balance;
-  }, 0); 
-  
+  }, 0);
+
+  // Receivables calculations
+  const pendingReceivables = receivables.filter(r => !r.received);
+  const currentMonthReceivables = pendingReceivables.filter(r => new Date(r.expectedDate).getMonth() === currentMonth);
+  const totalPendingReceivables = pendingReceivables.reduce((acc, r) => acc + r.amount, 0);
+  const totalCurrentMonthReceivables = currentMonthReceivables.reduce((acc, r) => acc + r.amount, 0);
+
   // 3. Cash Expenses (Non-Credit Card)
   const cashExpenses = monthlyTransactions.filter(t => 
     t.type === 'expense' && normalAccounts.find(a => a.id === t.accountId)
@@ -303,6 +319,60 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                         ))
                     ) : (
                         <div className="p-8 text-center text-slate-400 text-sm">Nenhum ganho registrado.</div>
+                    )}
+                </div>
+            </div>
+
+            {/* A Receber */}
+            <div className="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden">
+                <div className="bg-emerald-600 p-4 text-white flex justify-between items-center">
+                    <div className="flex items-center gap-2 font-bold uppercase text-sm tracking-wide">
+                        <CalendarClock size={18} /> A Receber (Mês)
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="font-bold text-lg">{formatCurrency(totalCurrentMonthReceivables)}</span>
+                        <button onClick={onAddReceivable} className="p-1.5 hover:bg-white/20 rounded-lg transition-colors" title="Adicionar">
+                            <Plus size={16} />
+                        </button>
+                    </div>
+                </div>
+                <div className="max-h-96 overflow-y-auto p-2 custom-scrollbar">
+                    {currentMonthReceivables.length > 0 ? (
+                        currentMonthReceivables.map(r => (
+                            <div key={r.id} className="group flex justify-between items-center p-3 hover:bg-slate-50 rounded-lg transition-colors border-b border-slate-50 last:border-0">
+                                <div className="flex-1">
+                                    <div className="font-semibold text-slate-700 text-sm">{r.description}</div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{r.category}</span>
+                                        <span className="text-[10px] text-slate-400">{format(new Date(r.expectedDate), 'dd/MM')}</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="font-bold text-sm text-emerald-600">{formatCurrency(r.amount)}</span>
+                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => {
+                                                const accountId = prompt('Selecione a conta (cole o nome):');
+                                                const account = accounts.find(a => a.name.toLowerCase().includes(accountId?.toLowerCase() || ''));
+                                                if (account) {
+                                                    onMarkAsReceived(r.id, account.id);
+                                                } else {
+                                                    alert('Conta não encontrada');
+                                                }
+                                            }}
+                                            className="text-emerald-500 hover:text-emerald-700 p-1"
+                                            title="Marcar como recebido"
+                                        >
+                                            <CheckCircle2 size={14}/>
+                                        </button>
+                                        <button onClick={() => onEditReceivable(r)} className="text-slate-400 hover:text-brand-600 p-1"><Pencil size={12}/></button>
+                                        <button onClick={() => onDeleteReceivable(r.id)} className="text-slate-400 hover:text-red-600 p-1"><Trash2 size={12}/></button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="p-8 text-center text-slate-400 text-sm">Nenhum valor a receber este mês.</div>
                     )}
                 </div>
             </div>

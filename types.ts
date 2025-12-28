@@ -68,6 +68,17 @@ export interface FinancialGoal {
   color: string;
 }
 
+export interface Receivable {
+  id: string;
+  description: string;
+  amount: number;
+  expectedDate: string; // ISO String
+  category: string;
+  received: boolean;
+  receivedDate?: string; // ISO String - when it was actually received
+  accountId?: string; // Account where it was deposited when received
+}
+
 export type ViewMode = 'kanban' | 'routines' | 'calendar' | 'dashboard' | 'finances';
 
 export const COLORS = {
