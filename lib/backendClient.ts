@@ -8,7 +8,11 @@ const getEnv = (key: string) => {
   }
 };
 
-const API_URL = getEnv('VITE_API_URL') || 'http://localhost:3001';
+// Em produção, use o nome do serviço Docker (backend)
+// Em desenvolvimento local, use localhost:3001
+const API_URL = getEnv('VITE_API_URL') || (typeof window !== 'undefined' && window.location.origin.includes('loopmind.cloud')
+  ? '/api'  // Produção: proxy via nginx
+  : 'http://localhost:3001'); // Desenvolvimento local
 
 // Supabase-compatible client that proxies to backend
 export const createBackendClient = () => {
