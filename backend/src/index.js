@@ -54,7 +54,11 @@ const verifyToken = (token) => {
 app.post('/auth/signup', async (req, res) => {
   try {
     console.log('Signup request:', req.body);
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    // Trim email and password to avoid whitespace issues
+    email = email?.trim();
+    password = password?.trim();
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
@@ -145,7 +149,11 @@ app.post('/auth/signup', async (req, res) => {
 app.post('/auth/signin', async (req, res) => {
   try {
     console.log('Signin request:', req.body);
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    // Trim email and password to avoid whitespace issues
+    email = email?.trim();
+    password = password?.trim();
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
