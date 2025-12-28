@@ -26,15 +26,19 @@ app.get('/health', (req, res) => {
 // Sign Up
 app.post('/auth/signup', async (req, res) => {
   try {
+    console.log('Signup request:', req.body);
     const { email, password } = req.body;
     const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
+      console.error('Supabase signup error:', error);
       return res.status(400).json({ error: error.message });
     }
 
+    console.log('Signup success:', data);
     res.json({ data });
   } catch (err) {
+    console.error('Signup exception:', err);
     res.status(500).json({ error: err.message });
   }
 });
