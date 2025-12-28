@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Calendar, ListTodo, BarChart3, Plus, Settings, Zap, Wallet, CheckSquare, Loader2, LogOut, RefreshCw } from 'lucide-react';
+import { Layout, Calendar, ListTodo, BarChart3, Plus, Settings, Zap, Wallet, CheckSquare, Loader2, LogOut, RefreshCw, Pencil, Trash2, CreditCard } from 'lucide-react';
 import { KanbanBoard } from './components/KanbanBoard';
 import { RoutineList } from './components/RoutineList';
 import { CalendarView } from './components/CalendarView';
@@ -36,6 +36,7 @@ export default function App() {
   const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
   const [isTransModalOpen, setIsTransModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isAccountManagementModalOpen, setIsAccountManagementModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   
   // Task Forms
@@ -709,12 +710,13 @@ export default function App() {
                     <CalendarView tasks={tasks} routines={routines} />
                 )}
                 {view === 'finances' && (
-                    <FinanceView 
+                    <FinanceView
                         accounts={accounts}
                         transactions={transactions}
                         goals={goals}
                         onAddTransaction={() => { resetTransForm(); setIsTransModalOpen(true); }}
                         onAddAccount={() => { resetAccForm(); setIsAccountModalOpen(true); }}
+                        onManageAccounts={() => setIsAccountManagementModalOpen(true)}
                         onAddCreditCard={handleAddCreditCard}
                         onAddGoal={() => { resetGoalForm(); setIsGoalModalOpen(true); }}
                         onEditTransaction={handleEditTransaction}
@@ -974,6 +976,66 @@ export default function App() {
               <div className="pt-4 flex justify-end gap-3">
                   <Button variant="ghost" onClick={() => setIsGoalModalOpen(false)}>Cancelar</Button>
                   <Button onClick={handleSaveGoal}>Salvar Meta</Button>
+              </div>
+          </div>
+      </Modal>
+
+      {/* ACCOUNT MANAGEMENT MODAL */}
+      <Modal isOpen={isAccountManagementModalOpen} onClose={() => setIsAccountManagementModalOpen(false)} title="Gerenciar Contas">
+          <div className="space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+                  <p className="text-sm text-slate-600">Gerencie todas as suas contas em um só lugar</p>
+                  <Button onClick={() => { resetAccForm(); setIsAccountModalOpen(true); setIsAccountManagementModalOpen(false); }} className="gap-2">
+                      <Plus size={16} /> Nova Conta
+                  </Button>
+              </div>
+              <div className="max-h-[400px] overflow-y-auto space-y-2">
+                  {accounts.length > 0 ? (
+                      accounts.map(account => (
+                          <div key={account.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                              <div className="flex items-center gap-3">
+                                  {account.type === 'credit-card' ? <CreditCard size={20} className="text-slate-400" /> : <Wallet size={20} className="text-slate-400" />}
+                                  <div>
+                                      <p className="font-semibold text-slate-700">{account.name}</p>
+                                      <p className="text-xs text-slate-500">{account.type === 'credit-card' ? 'Cartão de Crédito' : 'Conta Corrente'}</p>
+                                  </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                  <p className="font-bold text-slate-800">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(account.balance || 0)}</p>
+                                  <div className="flex gap-2">
+                                      <button
+                                          onClick={() => {
+                                              handleEditAccount(account);
+                                              setIsAccountManagementModalOpen(false);
+                                          }}
+                                          className="p-2 hover:bg-brand-50 rounded-lg text-brand-600 transition-colors"
+                                          title="Editar"
+                                      >
+                                          <Pencil size={16} />
+                                      </button>
+                                      <button
+                                          onClick={() => {
+                                              if (confirm(`Tem certeza que deseja excluir a conta "${account.name}"?`)) {
+                                                  handleDeleteAccount(account.id);
+                                              }
+                                          }}
+                                          className="p-2 hover:bg-red-50 rounded-lg text-red-600 transition-colors"
+                                          title="Excluir"
+                                      >
+                                          <Trash2 size={16} />
+                                      </button>
+                                  </div>
+                              </div>
+                          </div>
+                      ))
+                  ) : (
+                      <div className="text-center py-8 text-slate-400">
+                          <p className="mb-3">Nenhuma conta cadastrada</p>
+                          <Button onClick={() => { resetAccForm(); setIsAccountModalOpen(true); setIsAccountManagementModalOpen(false); }}>
+                              Adicionar Primeira Conta
+                          </Button>
+                      </div>
+                  )}
               </div>
           </div>
       </Modal>

@@ -16,6 +16,7 @@ interface FinanceViewProps {
   goals: FinancialGoal[];
   onAddTransaction: () => void;
   onAddAccount: () => void;
+  onManageAccounts: () => void;
   onAddCreditCard: () => void;
   onAddGoal: () => void;
   onEditTransaction: (t: Transaction) => void;
@@ -62,12 +63,13 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ t, showAccountName = 
     );
 };
 
-export const FinanceView: React.FC<FinanceViewProps> = ({ 
-  accounts, 
-  transactions, 
+export const FinanceView: React.FC<FinanceViewProps> = ({
+  accounts,
+  transactions,
   goals,
   onAddTransaction,
   onAddAccount,
+  onManageAccounts,
   onAddCreditCard,
   onAddGoal,
   onEditTransaction,
@@ -214,9 +216,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
             <h3 className="font-bold text-slate-700 flex items-center gap-2">
                 <CreditCard size={18} className="text-slate-400" /> Minhas Contas
             </h3>
-            <button onClick={onAddAccount} className="text-sm font-medium text-brand-600 hover:underline">Gerenciar</button>
-         </div>
-         <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+            <button onClick={onManageAccounts} className="text-sm font-medium text-brand-600 hover:underline">Gerenciar</button>
+         </div>         <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
             {accounts.map(account => {
                 const isCredit = account.type === 'credit-card';
                 return (
