@@ -644,17 +644,28 @@ export default function App() {
       await supabase.from('receivables').update(updatePayload).eq('id', receivableId);
 
       // Create income transaction
-      const transactionPayload = {
+      const newTransaction: Transaction = {
           id: generateId(),
-          account_id: accountId,
+          accountId: accountId,
           amount: receivable.amount,
-          type: 'income',
+          type: 'income' as TransactionType,
           category: receivable.category,
           description: receivable.description,
           date: today
       };
 
-      setTransactions(prev => [...prev, { ...transactionPayload, accountId: transactionPayload.account_id }]);
+      setTransactions(prev => [...prev, newTransaction]);
+
+      // Prepare database payload with snake_case field
+      const transactionPayload = {
+          id: newTransaction.id,
+          account_id: accountId,
+          amount: newTransaction.amount,
+          type: newTransaction.type,
+          category: newTransaction.category,
+          description: newTransaction.description,
+          date: newTransaction.date
+      };
       await supabase.from('transactions').insert(transactionPayload);
 
       // Update account balance
