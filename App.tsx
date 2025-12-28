@@ -873,7 +873,7 @@ export default function App() {
               <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Valor (R$)</label>
-                    <input type="number" value={transAmount} onChange={e => setTransAmount(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
+                    <input type="number" step="0.01" value={transAmount} onChange={e => setTransAmount(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
                   </div>
                    <div>
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Categoria</label>
@@ -933,12 +933,12 @@ export default function App() {
               <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">{accType === 'credit-card' ? 'Fatura Atual' : 'Saldo Inicial'}</label>
-                    <input type="number" value={accBalance} onChange={e => setAccBalance(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
+                    <input type="number" step="0.01" value={accBalance} onChange={e => setAccBalance(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
                   </div>
                   {accType === 'credit-card' && (
                        <div>
                         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Limite do Cartão</label>
-                        <input type="number" value={accLimit} onChange={e => setAccLimit(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
+                        <input type="number" step="0.01" value={accLimit} onChange={e => setAccLimit(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
                       </div>
                   )}
               </div>
@@ -959,11 +959,11 @@ export default function App() {
               <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Meta (Valor Total)</label>
-                    <input type="number" value={goalTarget} onChange={e => setGoalTarget(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
+                    <input type="number" step="0.01" value={goalTarget} onChange={e => setGoalTarget(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Já Guardado</label>
-                    <input type="number" value={goalCurrent} onChange={e => setGoalCurrent(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
+                    <input type="number" step="0.01" value={goalCurrent} onChange={e => setGoalCurrent(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none" placeholder="0.00" />
                   </div>
               </div>
               <div className="pt-4 flex justify-end gap-3">
