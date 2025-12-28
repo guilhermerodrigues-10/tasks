@@ -470,18 +470,19 @@ export default function App() {
   const handleDeleteTransaction = async (id: string) => {
       if(confirm('Excluir esta transação?')) {
           const trans = transactions.find(t => t.id === id);
+          if (!trans) return;
+
           setTransactions(prev => prev.filter(t => t.id !== id));
-          
           await supabase.from('transactions').delete().eq('id', id);
 
-          // Revert balance
-          if (trans) {
-             const account = accounts.find(a => a.id === trans.accountId);
-             if (account) {
-                 const newBalance = trans.type === 'income' ? account.balance - trans.amount : account.balance + trans.amount;
-                 setAccounts(prev => prev.map(a => a.id === trans.accountId ? { ...a, balance: newBalance } : a));
-                 await supabase.from('accounts').update({ balance: newBalance }).eq('id', trans.accountId);
-             }
+          // Revert balance - se era income, subtrair; se era expense, somar de volta
+          const account = accounts.find(a => a.id === trans.accountId);
+          if (account) {
+              const newBalance = trans.type === 'income'
+                  ? account.balance - trans.amount  // Remover income subtrai do saldo
+                  : account.balance + trans.amount; // Remover expense soma de volta ao saldo
+              setAccounts(prev => prev.map(a => a.id === trans.accountId ? { ...a, balance: newBalance } : a));
+              await supabase.from('accounts').update({ balance: newBalance }).eq('id', trans.accountId);
           }
       }
   };
