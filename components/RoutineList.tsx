@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Routine } from '../types';
 import { cn, FULL_DAYS } from '../utils';
-import { Plus, ChevronLeft, ChevronRight, Check, Clock, Flame } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Check, Clock, Flame, Trash2 } from 'lucide-react';
 import { addDays, format, startOfWeek, subDays, isSameDay, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -101,22 +101,38 @@ export const RoutineList: React.FC<RoutineListProps> = ({ routines, onToggleRout
                                        const isCompleted = routine.completionHistory?.includes(dateStr);
                                        
                                        return (
-                                           <div 
+                                           <div
                                                key={routine.id}
-                                               onClick={() => onToggleRoutine(routine.id, dateStr)}
                                                className={cn(
                                                    "group relative p-3.5 rounded-xl cursor-pointer transition-all duration-200 border",
-                                                   isCompleted 
-                                                        ? "bg-slate-50 border-slate-200" 
+                                                   isCompleted
+                                                        ? "bg-slate-50 border-slate-200"
                                                         : "bg-white border-slate-100 hover:border-brand-300 hover:shadow-md"
                                                )}
                                            >
-                                                <div className="flex items-start gap-3">
+                                                {/* Delete Button */}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (confirm(`Tem certeza que deseja remover a rotina "${routine.title}"?`)) {
+                                                            onDeleteRoutine(routine.id);
+                                                        }
+                                                    }}
+                                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-red-50 rounded-lg text-red-600 z-10"
+                                                    title="Deletar rotina"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+
+                                                <div
+                                                    onClick={() => onToggleRoutine(routine.id, dateStr)}
+                                                    className="flex items-start gap-3"
+                                                >
                                                    {/* Checkbox */}
                                                    <div className={cn(
                                                        "w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center transition-all duration-300 border",
-                                                       isCompleted 
-                                                            ? "bg-emerald-500 border-emerald-500 text-white shadow-emerald-500/30" 
+                                                       isCompleted
+                                                            ? "bg-emerald-500 border-emerald-500 text-white shadow-emerald-500/30"
                                                             : "bg-white border-slate-300 text-transparent group-hover:border-brand-400"
                                                    )}>
                                                        <Check size={14} strokeWidth={4} />
@@ -129,22 +145,22 @@ export const RoutineList: React.FC<RoutineListProps> = ({ routines, onToggleRout
                                                        )}>
                                                            {routine.title}
                                                        </p>
-                                                       
+
                                                        <div className="flex flex-wrap items-center gap-2 mt-2">
                                                             <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-medium border border-slate-200">
                                                                {routine.category}
                                                            </span>
-                                                           
+
                                                             <span className={cn("text-[10px] flex items-center gap-1", isCompleted ? "text-slate-400" : "text-slate-400")}>
                                                                 <Clock size={10} /> {routine.startTime}-{routine.endTime}
                                                            </span>
                                                        </div>
                                                    </div>
                                                 </div>
-                                                
+
                                                 {/* Streak Badge Absolute */}
                                                 {routine.streak > 0 && (
-                                                    <div className="absolute top-3 right-3 flex items-center gap-0.5 text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">
+                                                    <div className="absolute top-3 right-8 flex items-center gap-0.5 text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">
                                                         <Flame size={10} fill="currentColor" /> {routine.streak}
                                                     </div>
                                                 )}
