@@ -89,9 +89,12 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
   // 2. Classification
   const creditCards = accounts.filter(a => a.type === 'credit-card');
   const normalAccounts = accounts.filter(a => a.type !== 'credit-card');
-  
+
   // Calculate Total Net Worth (Sum of all account balances)
-  const totalBalance = accounts.reduce((acc, curr) => acc + curr.balance, 0); 
+  const totalBalance = accounts.reduce((acc, curr) => {
+    const balance = typeof curr.balance === 'number' && !isNaN(curr.balance) ? curr.balance : 0;
+    return acc + balance;
+  }, 0); 
   
   // 3. Cash Expenses (Non-Credit Card)
   const cashExpenses = monthlyTransactions.filter(t => 
