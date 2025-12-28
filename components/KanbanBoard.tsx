@@ -3,7 +3,7 @@ import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, Drag
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Task, Status, Priority } from '../types';
 import { cn, getPriorityColor, getStatusColor } from '../utils';
-import { Plus, MoreVertical, Calendar, Flag, Tag, Folder, Filter, Hash, LayoutGrid, List, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, MoreVertical, Calendar, Flag, Tag, Folder, Filter, Hash, LayoutGrid, List, ArrowUpDown, ArrowUp, ArrowDown, Trash2, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -20,9 +20,10 @@ interface KanbanColumnProps {
   tasks: Task[];
   onAddTask: () => void;
   onTaskClick: (t: Task) => void;
+  onDeleteTask: (taskId: string) => void;
 }
 
-const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks, onAddTask, onTaskClick }) => {
+const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks, onAddTask, onTaskClick, onDeleteTask }) => {
   const { setNodeRef } = useDroppable({ id: status });
 
   // Subtle indicators instead of full backgrounds
@@ -54,7 +55,15 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks, onAddTask, o
       
       <div ref={setNodeRef} className="flex-1 p-2 overflow-y-auto space-y-3 custom-scrollbar">
         {tasks.map(task => (
-          <DraggableTaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+          <DraggableTaskCard
+            key={task.id}
+            task={task}
+            onClick={() => onTaskClick(task)}
+            onDelete={(e) => {
+              e.stopPropagation();
+              onDeleteTask(task.id);
+            }}
+          />
         ))}
         {tasks.length === 0 && (
             <div className="h-32 border-2 border-dashed border-slate-200/50 rounded-xl flex flex-col items-center justify-center text-slate-300 text-sm gap-2 mt-2">
@@ -73,10 +82,11 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks, onAddTask, o
 interface TaskCardProps {
   task: Task;
   onClick?: () => void;
+  onDelete?: (e: React.MouseEvent) => void;
   isOverlay?: boolean;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, isOverlay }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete, isOverlay }) => {
   const priorityColors = {
       [Priority.LOW]: 'text-slate-500 bg-slate-100',
       [Priority.MEDIUM]: 'text-amber-600 bg-amber-50',
@@ -85,13 +95,40 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, isOverlay }) => {
   };
 
   return (
-    <div 
-      onClick={onClick}
+    <div
       className={cn(
-        "bg-white p-4 rounded-xl shadow-card border border-transparent cursor-pointer group relative transition-all duration-200",
+        "bg-white p-4 rounded-xl shadow-card border border-transparent group relative transition-all duration-200",
         isOverlay ? "rotate-2 shadow-xl scale-105 cursor-grabbing" : "hover:-translate-y-1 hover:shadow-card-hover hover:border-brand-100"
       )}
     >
+        {/* Action Buttons */}
+        {!isOverlay && (
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onClick?.();
+                    }}
+                    className="p-1.5 hover:bg-brand-50 rounded-lg text-brand-600 transition-colors"
+                    title="Editar"
+                >
+                    <Edit size={14} />
+                </button>
+                {onDelete && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(e);
+                        }}
+                        className="p-1.5 hover:bg-red-50 rounded-lg text-red-600 transition-colors"
+                        title="Deletar"
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                )}
+            </div>
+        )}
+
         {/* Project Tag */}
         {task.project && (
             <div className="mb-2">
@@ -100,7 +137,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, isOverlay }) => {
                 </span>
             </div>
         )}
-     
+
       <h4 className={cn("text-sm font-semibold text-slate-800 mb-3 leading-snug", task.status === Status.DONE && "line-through text-slate-400")}>
         {task.title}
       </h4>
@@ -133,9 +170,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, isOverlay }) => {
 interface DraggableTaskCardProps {
   task: Task;
   onClick: () => void;
+  onDelete: (e: React.MouseEvent) => void;
 }
 
-const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({ task, onClick }) => {
+const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({ task, onClick, onDelete }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
     data: { task }
@@ -151,7 +189,7 @@ const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({ task, onClick }) 
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <TaskCard task={task} onClick={onClick} />
+      <TaskCard task={task} onClick={onClick} onDelete={onDelete} />
     </div>
   );
 };
@@ -276,7 +314,7 @@ const TaskListView: React.FC<{ tasks: Task[], onTaskClick: (t: Task) => void }> 
     );
 };
 
-export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onMoveTask, onAddTask, onEditTask }) => {
+export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onMoveTask, onAddTask, onEditTask, onDeleteTask }) => {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [selectedProject, setSelectedProject] = useState<string>('');
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
@@ -372,12 +410,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onMoveTask, onA
           <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="flex gap-6 h-full overflow-x-auto pb-4 snap-x">
               {Object.values(Status).map(status => (
-                <KanbanColumn 
-                  key={status} 
-                  status={status} 
+                <KanbanColumn
+                  key={status}
+                  status={status}
                   tasks={filteredTasks.filter(t => t.status === status)}
                   onAddTask={() => onAddTask(status)}
                   onTaskClick={onEditTask}
+                  onDeleteTask={onDeleteTask}
                 />
               ))}
             </div>
