@@ -564,6 +564,48 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                     {formatCurrency(totalExpenses)}
                 </span>
             </div>
+
+            {/* Total Monthly Projection: Current Balance + Projected Income - Projected Expenses */}
+            {(() => {
+                const projectedTotal = totalBalance + totalIncome + totalCurrentMonthReceivables - totalExpenses;
+                const isPositive = projectedTotal >= 0;
+                return (
+                    <div className={cn(
+                        "p-5 rounded-xl border-2 flex justify-between items-center mt-4 shadow-md",
+                        isPositive
+                            ? "bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-300"
+                            : "bg-gradient-to-br from-red-50 to-red-100/50 border-red-300"
+                    )}>
+                        <div className="flex flex-col">
+                            <span className="font-bold text-slate-800 text-base uppercase">Projeção Total do Mês</span>
+                            <span className="text-xs text-slate-600 mt-1">
+                                Saldo Atual + Ganhos Projetados - Gastos Projetados
+                            </span>
+                            <div className="flex gap-2 mt-2 text-xs text-slate-500">
+                                <span>{formatCurrency(totalBalance)}</span>
+                                <span>+</span>
+                                <span>{formatCurrency(totalIncome + totalCurrentMonthReceivables)}</span>
+                                <span>-</span>
+                                <span>{formatCurrency(totalExpenses)}</span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className={cn(
+                                "text-2xl font-bold",
+                                isPositive ? "text-emerald-700" : "text-red-700"
+                            )}>
+                                {formatCurrency(projectedTotal)}
+                            </span>
+                            <span className={cn(
+                                "text-xs font-semibold mt-1",
+                                isPositive ? "text-emerald-600" : "text-red-600"
+                            )}>
+                                {isPositive ? "Superávit" : "Déficit"}
+                            </span>
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
       </div>
     </div>
