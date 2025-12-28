@@ -145,7 +145,12 @@ export default function App() {
       // Fetch Accounts
       const { data: accountsData } = await supabase.from('accounts').select('*');
       if (accountsData) {
-          setAccounts(accountsData);
+          const formattedAccounts = accountsData.map((a: any) => ({
+              ...a,
+              balance: parseFloat(a.balance) || 0,
+              credit_limit: a.credit_limit ? parseFloat(a.credit_limit) : undefined
+          }));
+          setAccounts(formattedAccounts);
       }
 
       // Fetch Transactions
@@ -154,7 +159,7 @@ export default function App() {
            const formattedTrans = transData.map((t: any) => ({
                id: t.id,
                accountId: t.account_id,
-               amount: t.amount,
+               amount: parseFloat(t.amount) || 0,
                type: t.type,
                category: t.category,
                description: t.description,
@@ -169,8 +174,8 @@ export default function App() {
            const formattedGoals = goalsData.map((g: any) => ({
                id: g.id,
                title: g.title,
-               targetAmount: g.target_amount,
-               currentAmount: g.current_amount,
+               targetAmount: parseFloat(g.target_amount) || 0,
+               currentAmount: parseFloat(g.current_amount) || 0,
                color: g.color
            }));
            setGoals(formattedGoals);
