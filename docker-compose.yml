@@ -5,8 +5,8 @@ services:
   backend:
     image: gulenda/flowstate-backend:latest
     environment:
-      - SUPABASE_URL=https://ncbmjkhoplgyfgxeqhmo.supabase.co
-      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYm1qa2hvcGxneWZneGVxaG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzMwMzgsImV4cCI6MjA4MTA0OTAzOH0.t6_KI2oF6u7jmFwu8R_Av16vcBe5qgUTYgr9p1u4Ux4
+      - DATABASE_URL=postgresql://postgres.ncbmjkhoplgyfgxeqhmo:QKuZg482wKvhWfgNYour@aws-1-us-east-1.pooler.supabase.com:5432/postgres
+      - JWT_SECRET=flowstate-production-secret-change-this-in-production
       - PORT=3001
     networks:
       - app-network
