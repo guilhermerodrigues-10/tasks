@@ -217,15 +217,41 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
             {accounts.map(account => {
                 const isCredit = account.type === 'credit-card';
                 return (
-                    <div 
-                        key={account.id} 
-                        onClick={() => onEditAccount(account)}
+                    <div
+                        key={account.id}
                         className={cn(
-                            "min-w-[240px] h-28 rounded-2xl p-5 text-white flex flex-col justify-between shadow-lg relative overflow-hidden bg-gradient-to-br cursor-pointer hover:scale-[1.02] transition-transform",
+                            "group min-w-[240px] h-28 rounded-2xl p-5 text-white flex flex-col justify-between shadow-lg relative overflow-hidden bg-gradient-to-br hover:scale-[1.02] transition-transform",
                             getAccountGradient(account.color)
                         )}
                     >
                         <div className="absolute top-0 right-0 p-24 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+
+                        {/* Action Buttons */}
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-20">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEditAccount(account);
+                                }}
+                                className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+                                title="Editar conta"
+                            >
+                                <Pencil size={14} />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (confirm(`Tem certeza que deseja excluir a conta "${account.name}"?`)) {
+                                        onDeleteAccount(account.id);
+                                    }
+                                }}
+                                className="p-1.5 hover:bg-red-500/30 rounded-lg transition-colors"
+                                title="Deletar conta"
+                            >
+                                <Trash2 size={14} />
+                            </button>
+                        </div>
+
                         <div className="flex justify-between items-start relative z-10">
                             <div>
                                 <h4 className="font-bold text-lg">{account.name}</h4>
