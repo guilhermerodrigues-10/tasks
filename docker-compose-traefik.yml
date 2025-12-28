@@ -23,10 +23,11 @@ services:
         constraints:
           - node.role == manager
     networks:
-      - traefik-public
+      - web
     environment:
       - NODE_ENV=production
 
 networks:
-  traefik-public:
-    external: true
+  web:
+    driver: overlay
+    attachable: true
