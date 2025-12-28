@@ -5,7 +5,7 @@ services:
   backend:
     image: gulenda/flowstate-backend:latest
     environment:
-      - DATABASE_URL=postgresql://postgres.ncbmjkhoplgyfgxeqhmo:QKuZg482wKvhWfgNYour@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+      - DATABASE_URL=postgresql://postgres.ncbmjkhoplgyfgxeqhmo:QKuZg482wKvhWfgN@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
       - JWT_SECRET=flowstate-production-secret-change-this-in-production
       - PORT=3001
     networks:
