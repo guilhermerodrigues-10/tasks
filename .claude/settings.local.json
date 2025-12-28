@@ -13,7 +13,10 @@
       "Bash(npm run dev:*)",
       "Bash(docker login:*)",
       "Bash(docker build:*)",
-      "Bash(docker push:*)"
+      "Bash(docker push:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker info:*)"
     ]
   }
 }
